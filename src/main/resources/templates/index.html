@@ -1,0 +1,303 @@
+<!DOCTYPE html>
+<html lang="en"
+      xmlns:th = "http://www.thymeleaf.org"
+      xmlns:layout = "http://www.ultraq.net.nz/thymeleaf/layout"
+      xmlns:sec="http://www.thymeleaf.org/extras/spring-security"
+      layout:decorate="layout.html">
+<div layout:fragment="content">
+
+    <input type="hidden" id = "bookId">
+
+    <div class="row mb-3" sec:authorize="hasAnyRole('ROLE_USER')">
+        <div class="col-6 mx-auto">
+            <div class="row mt-3">
+                <div class="col-12">
+                    <label>NAME : </label>
+                </div>
+            </div>
+            <div class="row mt-2">
+                <div class="col-12">
+                    <input type="text" class="form-control" id="bookName">
+                </div>
+            </div>
+            <div class="row mt-3">
+                <div class="col-12">
+                    <label>DESCRIPTION : </label>
+                </div>
+            </div>
+            <div class="row mt-2">
+                <div class="col-12">
+                    <textarea class="form-control" id="description"></textarea>
+                </div>
+            </div>
+            <div class="row mt-3">
+                <div class="col-12">
+                    <label>AUTHOR : </label>
+                </div>
+            </div>
+            <div class="row mt-2">
+                <div class="col-12">
+                    <input type="number" class="form-control" id="author">
+                </div>
+            </div>
+            <div class="row mt-3">
+                <div class="col-12">
+                    <button class="btn btn-success" onclick="addBook()">ADD BOOK</button>
+                </div>
+            </div>
+        </div>
+
+        <script type="text/javascript">
+            function addBook() {
+
+                const httpRequest = new XMLHttpRequest();
+                httpRequest.open("POST", "/book", true);
+                httpRequest.setRequestHeader("Content-Type", "application/json");
+
+                let bookName = document.getElementById("bookName");
+                let description = document.getElementById("description");
+                let author = document.getElementById("author");
+
+                httpRequest.onreadystatechange = function () {
+                    if (httpRequest.readyState == XMLHttpRequest.DONE && httpRequest.status == 200) {
+                        bookName.value = "";
+                        description.value = "";
+                        author.value = "";
+                        loadBooks();
+                    }
+                };
+
+                let body = {
+                    'bookName': bookName.value,
+                    'description' : description.value,
+                    'author' : author.value
+                };
+
+                body = JSON.stringify(body);
+                httpRequest.send(body);
+
+            }
+        </script>
+    </div>
+    <div class="row">
+        <div class="col-12">
+            <table class="table table-striped">
+                <thead>
+                <tr>
+                    <th>ID</th>
+                    <th>NAME</th>
+                    <th>AUTHOR</th>
+                    <th style="width: 10%;" sec:authorize="hasAnyRole('ROLE_USER')">DESCRIPTION</th>
+                </tr>
+                </thead>
+                <tbody id = "booksListBody">
+
+                </tbody>
+            </table>
+
+            <div class="modal fade" id="detailsModal" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1" aria-labelledby="staticBackdropLabel" aria-hidden="true">
+                <div class="modal-dialog">
+                    <div class="modal-content" sec:authorize="hasAnyRole('ROLE_USER')">
+                        <div class="modal-header">
+                            <h1 class="modal-title fs-5" >Book Details</h1>
+                            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                        </div>
+                        <div class="modal-body">
+                            <div class="row mt-3">
+                                <div class="col-12">
+                                    <label>NAME : </label>
+                                </div>
+                            </div>
+                            <div class="row mt-2">
+                                <div class="col-12">
+                                    <input type="text" readonly class="form-control" id="bookNameDetails">
+                                </div>
+                            </div>
+                            <div class="row mt-3">
+                                <div class="col-12">
+                                    <label>DESCRIPTION : </label>
+                                </div>
+                            </div>
+                            <div class="row mt-2">
+                                <div class="col-12">
+                                    <textarea class="form-control" readonly id="descriptionDetails"></textarea>
+                                </div>
+                            </div>
+                            <div class="row mt-3">
+                                <div class="col-12">
+                                    <label>AUTHOR : </label>
+                                </div>
+                            </div>
+                            <div class="row mt-2">
+                                <div class="col-12">
+                                    <input type="number" readonly class="form-control" id="authorDetails">
+                                </div>
+                            </div>
+                        </div>
+                        <div class="modal-footer">
+                            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">CLOSE</button>
+                            <button type="button" class="btn btn-primary">OK</button>
+                        </div>
+                    </div>
+                    <div class="modal-content" sec:authorize="hasAnyRole('ROLE_ADMIN')">
+                        <div class="modal-header">
+                            <h1 class="modal-title fs-5" >Book Details</h1>
+                            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                        </div>
+                        <div class="modal-body">
+                            <div class="row mt-3">
+                                <div class="col-12">
+                                    <label>NAME : </label>
+                                </div>
+                            </div>
+                            <div class="row mt-2">
+                                <div class="col-12">
+                                    <input type="text" class="form-control" id="bookNameDetails">
+                                </div>
+                            </div>
+                            <div class="row mt-3">
+                                <div class="col-12">
+                                    <label>DESCRIPTION : </label>
+                                </div>
+                            </div>
+                            <div class="row mt-2">
+                                <div class="col-12">
+                                    <textarea class="form-control" id="descriptionDetails"></textarea>
+                                </div>
+                            </div>
+                            <div class="row mt-3">
+                                <div class="col-12">
+                                    <label>AUTHOR : </label>
+                                </div>
+                            </div>
+                            <div class="row mt-2">
+                                <div class="col-12">
+                                    <input type="number" class="form-control" id="authorDetails">
+                                </div>
+                            </div>
+                        </div>
+                        <div class="modal-footer">
+                            <button  type="button" class="btn btn-danger" onclick="deleteBook()" >DELETE</button>
+                            <button type="button" class="btn btn-primary" onclick="updateBook()">SAVE</button>
+                        </div>
+                        <script type="text/javascript">
+                            function updateBook(){
+
+                                const httpRequest = new XMLHttpRequest();
+                                httpRequest.open("PUT", "/book", true);
+                                httpRequest.setRequestHeader("Content-Type", "application/json");
+
+                                let courseId = document.getElementById("bookId");
+                                let courseName = document.getElementById("bookNameDetails");
+                                let description = document.getElementById("descriptionDetails");
+                                let price = document.getElementById("authorDetails");
+
+                                httpRequest.onreadystatechange = function () {
+                                    if (httpRequest.readyState == XMLHttpRequest.DONE && httpRequest.status == 200) {
+                                        loadBooks();
+                                    }
+                                };
+
+                                let body = {
+                                    'id' : bookId.value,
+                                    'bookName': bookName.value,
+                                    'description' : description.value,
+                                    'author' : author.value
+                                };
+
+                                body = JSON.stringify(body);
+                                httpRequest.send(body);
+                            }
+
+                            function deleteBook(){
+
+                                let approve = confirm("Are you sure you want to delete?");
+
+                                if(approve){
+
+                                    let bookId = document.getElementById("bookId");
+
+                                    const httpRequest = new XMLHttpRequest();
+                                    httpRequest.open("DELETE", "/course/"+bookId.value, true);
+
+                                    httpRequest.onreadystatechange = function () {
+                                        if (httpRequest.readyState == XMLHttpRequest.DONE && httpRequest.status == 200) {
+                                            detailsModal.hide();
+                                            loadCourses();
+                                        }
+                                    };
+
+                                    httpRequest.send();
+                                }
+
+                            }
+                        </script>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <script type="text/javascript">
+
+        loadBooks();
+        function loadBooks(){
+            const httpRequest = new XMLHttpRequest();
+            httpRequest.open("GET", "/book", true);
+            httpRequest.onreadystatechange = function (){
+                if(httpRequest.readyState == XMLHttpRequest.DONE && httpRequest.status == 200){
+                    let bookList = JSON.parse(httpRequest.responseText);
+                    let tableContent = "";
+                    for (let i = 0; i < bookList.length; i++) {
+                        tableContent += "<tr>";
+                        tableContent += "<td>" + bookList[i].id + "</td>";
+                        tableContent += "<td>" + bookList[i].name + "</td>";
+                        tableContent += "<td>" + bookList[i].author + "</td>";
+                        tableContent += "<td>" + bookList[i].description + "</td>";
+                        tableContent += "<td><button class='btn btn-primary btn-sm' onclick='openBookDetailsModal("+bookList[i].id+")'>DETAILS</button></td>";
+                        tableContent += "</tr>";
+                    }
+                    document.getElementById("booksListBody").innerHTML = tableContent;
+                }
+            }
+            httpRequest.send();
+        }
+
+        function openBookDetailsModal(id){
+
+            detailsModal = new bootstrap.Modal(document.getElementById('detailsModal'));
+
+            const httpRequest = new XMLHttpRequest();
+            httpRequest.open("GET", "/book/"+id, true);
+            httpRequest.onreadystatechange = function () {
+                if (httpRequest.readyState == XMLHttpRequest.DONE && httpRequest.status == 200) {
+                    let result = JSON.parse(httpRequest.responseText);
+                    bookNameDetails.value = result.bookName;
+                    descriptionDetails.value = result.description;
+                    authorDetails.value = result.author;
+                    bookId.value = result.id;
+
+                    detailsModal.show();
+
+                }
+            }
+            httpRequest.send();
+        }
+
+    </script>
+</div>
+</html>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
